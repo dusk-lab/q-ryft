@@ -10,7 +10,7 @@ type StaticType = "url" | "wifi" | "vcard" | "text" | "email" | "sms" | "event" 
 
 export default function CreateQR() {
     const navigate = useNavigate();
-    const [mode, setMode] = useState<"dynamic" | "static">("dynamic");
+    const [mode, setMode] = useState<"dynamic" | "static">("static");
     const [staticType, setStaticType] = useState<StaticType>("url");
 
     // Dynamic Form Data
@@ -153,7 +153,7 @@ export default function CreateQR() {
                     }}
                 >
                     <Zap size={18} />
-                    Dynamic Link (Trackable)
+                    Dynamic QR (Trackable) (Beta)
                 </button>
                 <button
                     onClick={() => { setMode("static"); setCreatedQR(null); }}
@@ -165,7 +165,7 @@ export default function CreateQR() {
                     }}
                 >
                     <FileText size={18} />
-                    Static Code (Raw)
+                    Static QR (Raw)
                 </button>
             </div>
 

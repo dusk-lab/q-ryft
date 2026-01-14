@@ -6,22 +6,38 @@ import { getAppUrl } from "../utils/url";
 
 interface QRCardProps {
     qr: QRLink;
+    selectable?: boolean;
+    selected?: boolean;
+    onSelect?: () => void;
 }
 
-export default function QRCard({ qr }: QRCardProps) {
+export default function QRCard({ qr, selectable, selected, onSelect }: QRCardProps) {
     const fullRedirectUrl = getAppUrl(`/q/${qr.slug}`);
 
     return (
         <div style={{
-            border: "1px solid var(--color-border)",
+            border: selected ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
             borderRadius: "var(--radius)",
             padding: "1.5rem",
             display: "flex",
             flexWrap: "wrap", // Allow wrapping on small screens
             gap: "1.5rem",
             backgroundColor: "var(--color-bg)",
-            alignItems: "flex-start"
+            alignItems: "flex-start",
+            position: "relative",
+            transition: "all 0.2s"
         }}>
+            {selectable && (
+                <div style={{ marginRight: "-0.5rem" }}>
+                    <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={onSelect}
+                        style={{ width: "20px", height: "20px", cursor: "pointer", accentColor: "var(--color-primary)" }}
+                    />
+                </div>
+            )}
+
             <div style={{
                 padding: "0.5rem",
                 background: "white",

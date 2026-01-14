@@ -96,6 +96,12 @@ button {
     border-color: transparent;
 }
 
+/* Fix for Select inputs in Dark Mode */
+select.input option {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
 /* Responsive Create QR Layout */
 .create-qr-layout {
     display: grid;
