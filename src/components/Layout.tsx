@@ -45,7 +45,7 @@ export default function Layout() {
 
             <footer style={{ borderTop: "1px solid var(--color-border)", padding: "2rem 0", color: "var(--color-secondary)" }}>
                 <div className="container" style={{ textAlign: "center", fontSize: "0.875rem" }}>
-                    <p>© {new Date().getFullYear()} Made with ❤️ by Dusk Lab. Built for reliability.</p>
+                    <p>© {new Date().getFullYear()} Made with ❤️ by <a href="https://dusk-lab.github.io/main-website/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "var(--color-text)" }}>Dusk Lab</a>.</p>
                 </div>
             </footer>
         </div>
