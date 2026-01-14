@@ -2,13 +2,14 @@ import { Link } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { ExternalLink, Edit2, BarChart2 } from "lucide-react";
 import { QRLink } from "../models/qr.model";
+import { getAppUrl } from "../utils/url";
 
 interface QRCardProps {
     qr: QRLink;
 }
 
 export default function QRCard({ qr }: QRCardProps) {
-    const fullRedirectUrl = `${window.location.origin}/q/${qr.slug}`;
+    const fullRedirectUrl = getAppUrl(`/q/${qr.slug}`);
 
     return (
         <div style={{

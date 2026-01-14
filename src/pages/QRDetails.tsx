@@ -4,6 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { ArrowLeft, Save, ExternalLink, Download, Trash2, Power } from "lucide-react";
 import { getQRLink, updateQRLink, deleteQRLink } from "../services/storage.service";
 import { QRLink } from "../models/qr.model";
+import { getAppUrl } from "../utils/url";
 
 export default function QRDetails() {
     const { id } = useParams<{ id: string }>();
@@ -84,7 +85,7 @@ export default function QRDetails() {
     if (loading) return <div className="container">Loading...</div>;
     if (!qr) return null;
 
-    const fullRedirectUrl = `${window.location.origin}/q/${qr.slug}`;
+    const fullRedirectUrl = getAppUrl(`/q/${qr.slug}`);
 
     return (
         <div className="container" style={{ padding: "2rem 1rem" }}>
