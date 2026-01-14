@@ -7,13 +7,13 @@ const STORAGE_KEY = "qryft.qr_links.v1";
  * Returns an empty array if none exist.
  */
 function loadAll(): QRLink[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as QRLink[];
-  } catch {
-    return [];
-  }
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        return JSON.parse(raw) as QRLink[];
+    } catch {
+        return [];
+    }
 }
 
 /**
@@ -21,42 +21,59 @@ function loadAll(): QRLink[] {
  * This is the single write path.
  */
 function saveAll(links: QRLink[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
 }
 
 /**
  * Return all QR links.
  */
 export function listQRLinks(): QRLink[] {
-  return loadAll();
+    return loadAll();
+}
+
+/**
+ * Get a single QR link by ID.
+ */
+export function getQRLink(id: string): QRLink | null {
+    const links = loadAll();
+    return links.find((l) => l.id === id) || null;
+}
+
+/**
+ * Get a single QR link by Slug.
+ * Critical for the redirect flow.
+ */
+export function getQRLinkBySlug(slug: string): QRLink | null {
+    const links = loadAll();
+    return links.find((l) => l.slug === slug) || null;
 }
 
 /**
  * Create and store a new QR link.
  */
 export function createQRLink(input: {
-  id: string;
-  slug: string;
-  name: string;
-  destinationUrl: string;
+    id: string;
+    slug: string;
+    name: string;
+    destinationUrl: string;
 }): QRLink {
-  const now = new Date().toISOString();
+    const now = new Date().toISOString();
 
-  const link: QRLink = {
-    id: input.id,
-    slug: input.slug,
-    name: input.name,
-    destinationUrl: input.destinationUrl,
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
-  };
+    const link: QRLink = {
+        id: input.id,
+        slug: input.slug,
+        name: input.name,
+        destinationUrl: input.destinationUrl,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+    };
 
-  const links = loadAll();
-  links.push(link);
-  saveAll(links);
+    const links = loadAll();
+    links.push(link);
+    saveAll(links);
 
-  return link;
+    return link;
 }
 
 /**
@@ -64,25 +81,25 @@ export function createQRLink(input: {
  * Only mutable fields may be changed.
  */
 export function updateQRLink(
-  id: string,
-  updates: Partial<Pick<QRLink, "name" | "destinationUrl" | "isActive">>
+    id: string,
+    updates: Partial<Pick<QRLink, "name" | "destinationUrl" | "isActive">>
 ): QRLink | null {
-  const links = loadAll();
-  const index = links.findIndex((l) => l.id === id);
+    const links = loadAll();
+    const index = links.findIndex((l) => l.id === id);
 
-  if (index === -1) return null;
+    if (index === -1) return null;
 
-  const existing = links[index];
-  const updated: QRLink = {
-    ...existing,
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  };
+    const existing = links[index];
+    const updated: QRLink = {
+        ...existing,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+    };
 
-  links[index] = updated;
-  saveAll(links);
+    links[index] = updated;
+    saveAll(links);
 
-  return updated;
+    return updated;
 }
 
 /**
@@ -90,11 +107,11 @@ export function updateQRLink(
  * Use sparingly; prefer disable instead.
  */
 export function deleteQRLink(id: string): boolean {
-  const links = loadAll();
-  const next = links.filter((l) => l.id !== id);
+    const links = loadAll();
+    const next = links.filter((l) => l.id !== id);
 
-  if (next.length === links.length) return false;
+    if (next.length === links.length) return false;
 
-  saveAll(next);
-  return true;
+    saveAll(next);
+    return true;
 }
