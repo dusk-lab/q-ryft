@@ -100,8 +100,6 @@ Initial focus:
 * Simple UI
 * Reliable redirect behavior
 
-You can follow progress and plans in [`plans.md`](./plans.md).
-
 ---
 
 ## Tech Stack (Initial)
