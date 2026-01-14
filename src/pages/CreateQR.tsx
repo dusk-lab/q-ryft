@@ -212,6 +212,46 @@ export default function CreateQR() {
                                     <div><label className="label">Website</label><input type="url" className="input" onChange={e => setStaticData({ ...staticData, website: e.target.value })} /></div>
                                 </>
                             )}
+
+                            {staticType === "email" && (
+                                <>
+                                    <div><label className="label">To Email</label><input type="email" required className="input" placeholder="someone@example.com" onChange={e => setStaticData({ ...staticData, to: e.target.value })} /></div>
+                                    <div><label className="label">Subject</label><input type="text" className="input" placeholder="Inquiry..." onChange={e => setStaticData({ ...staticData, subject: e.target.value })} /></div>
+                                    <div><label className="label">Body</label><textarea className="input" rows={4} placeholder="Hello..." onChange={e => setStaticData({ ...staticData, body: e.target.value })} /></div>
+                                </>
+                            )}
+
+                            {staticType === "sms" && (
+                                <>
+                                    <div><label className="label">Phone Number</label><input type="tel" required className="input" placeholder="+1234567890" onChange={e => setStaticData({ ...staticData, phone: e.target.value })} /></div>
+                                    <div><label className="label">Message</label><textarea className="input" rows={4} placeholder="I'm interested in..." onChange={e => setStaticData({ ...staticData, message: e.target.value })} /></div>
+                                </>
+                            )}
+
+                            {staticType === "event" && (
+                                <>
+                                    <div><label className="label">Event Title</label><input type="text" required className="input" onChange={e => setStaticData({ ...staticData, title: e.target.value })} /></div>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                                        <div><label className="label">Start Time</label><input type="datetime-local" className="input" onChange={e => setStaticData({ ...staticData, start: e.target.value })} /></div>
+                                        <div><label className="label">End Time</label><input type="datetime-local" className="input" onChange={e => setStaticData({ ...staticData, end: e.target.value })} /></div>
+                                    </div>
+                                    <div><label className="label">Location</label><input type="text" className="input" placeholder="123 Main St" onChange={e => setStaticData({ ...staticData, location: e.target.value })} /></div>
+                                    <div><label className="label">Description</label><textarea className="input" rows={3} onChange={e => setStaticData({ ...staticData, description: e.target.value })} /></div>
+                                </>
+                            )}
+
+                            {staticType === "geo" && (
+                                <>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                                        <div><label className="label">Latitude</label><input type="number" step="any" className="input" placeholder="37.7749" onChange={e => setStaticData({ ...staticData, lat: e.target.value })} /></div>
+                                        <div><label className="label">Longitude</label><input type="number" step="any" className="input" placeholder="-122.4194" onChange={e => setStaticData({ ...staticData, lng: e.target.value })} /></div>
+                                    </div>
+                                    <p style={{ fontSize: "0.8rem", color: "var(--color-secondary)", marginTop: "0.5rem" }}>
+                                        Tip: You can get these coordinates from Google Maps (right-click a location).
+                                    </p>
+                                </>
+                            )}
+
                         </div>
                     </div>
 
