@@ -155,4 +155,20 @@ select.input option {
         flex: 0 0 80px;
         min-width: 80px;
     }
+
+    /* Hide Create QR Text on Mobile */
+    .nav-btn-text {
+        display: none;
+    }
+
+    .nav-create-btn {
+        padding: 0.5rem;
+    }
+}
+
+/* Nav Button Desktop Defaults */
+.nav-create-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
 }

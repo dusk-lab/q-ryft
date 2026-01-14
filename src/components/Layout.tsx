@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Outlet } from "react-router-dom";
-import { QrCode, Sun, Moon } from "lucide-react";
+import { QrCode, Sun, Moon, Plus } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 
 export default function Layout() {
@@ -12,7 +12,7 @@ export default function Layout() {
                 <div className="container" style={{ height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <Link to="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: "bold", fontSize: "1.25rem" }}>
                         <QrCode />
-                        <span>Qryft (Beta)</span>
+                        <span>Q-ryft (Beta)</span>
                     </Link>
                     <nav style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
                         <button
@@ -32,8 +32,9 @@ export default function Layout() {
                             {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
                         <Link to="/dashboard" style={{ fontSize: "0.9rem" }}>Dashboard</Link>
-                        <Link to="/create" className="btn btn-primary" style={{ fontSize: "0.9rem", padding: "0.25rem 0.75rem" }}>
-                            Create QR
+                        <Link to="/create" className="btn btn-primary nav-create-btn">
+                            <Plus size={18} />
+                            <span className="nav-btn-text">Create QR</span>
                         </Link>
                     </nav>
                 </div>
