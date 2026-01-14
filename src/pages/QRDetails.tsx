@@ -62,23 +62,61 @@ export default function QRDetails() {
         }
     };
 
+    const [downloadFormat, setDownloadFormat] = useState<"svg" | "png" | "jpeg">("svg");
+
     const downloadQR = () => {
-        const canvas = document.getElementById("qr-canvas") as HTMLCanvasElement;
-        if (!canvas) {
-            // Fallback for SVG download if we aren't using canvas
-            const svg = document.querySelector("#qr-wrapper svg");
-            if (svg) {
-                const svgData = new XMLSerializer().serializeToString(svg);
-                const blob = new Blob([svgData], { type: "image/svg+xml" });
-                const url = URL.createObjectURL(blob);
+        const svg = document.querySelector("#qr-wrapper svg");
+        if (!svg) return;
+
+        if (downloadFormat === "svg") {
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], { type: "image/svg+xml" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `qryft-${qr?.slug}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } else {
+            // Canvas Rasterization for PNG/JPEG
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const img = new Image();
+
+            // Standardize size (e.g., 1000px for high quality)
+            const size = 1000;
+            canvas.width = size;
+            canvas.height = size;
+
+            // Base64 encode SVG for Image src
+            const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = () => {
+                if (!ctx) return;
+
+                // Fill white background for JPEG (otherwise transparent parts become black)
+                if (downloadFormat === "jpeg") {
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(0, 0, size, size);
+                }
+
+                ctx.drawImage(img, 0, 0, size, size);
+
+                const imgUrl = canvas.toDataURL(`image/${downloadFormat}`);
                 const a = document.createElement("a");
-                a.href = url;
-                a.download = `qryft-${qr?.slug}.svg`;
+                a.href = imgUrl;
+                a.download = `qryft-${qr?.slug}.${downloadFormat}`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-            }
-            return;
+                URL.revokeObjectURL(url);
+            };
+
+            img.src = url;
         }
     };
 
@@ -184,9 +222,32 @@ export default function QRDetails() {
                                 <p style={{ fontSize: "0.875rem", color: "var(--color-secondary)", marginBottom: "1rem", wordBreak: "break-all" }}>
                                     {fullRedirectUrl}
                                 </p>
+
+                                <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center", gap: "0.5rem" }}>
+                                    {(["svg", "png", "jpeg"] as const).map((fmt) => (
+                                        <button
+                                            key={fmt}
+                                            onClick={() => setDownloadFormat(fmt)}
+                                            style={{
+                                                padding: "0.25rem 0.5rem",
+                                                borderRadius: "0.25rem",
+                                                border: "1px solid var(--color-border)",
+                                                background: downloadFormat === fmt ? "var(--color-primary)" : "transparent",
+                                                color: downloadFormat === fmt ? "var(--color-bg)" : "var(--color-text)",
+                                                fontSize: "0.8rem",
+                                                textTransform: "uppercase",
+                                                fontWeight: "600",
+                                                cursor: "pointer"
+                                            }}
+                                        >
+                                            {fmt}
+                                        </button>
+                                    ))}
+                                </div>
+
                                 <button onClick={downloadQR} className="btn btn-outline" style={{ width: "100%", gap: "0.5rem" }}>
                                     <Download size={18} />
-                                    Download SVG
+                                    Download {downloadFormat.toUpperCase()}
                                 </button>
                             </div>
                         </div>

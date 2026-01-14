@@ -17,6 +17,7 @@ export default function QRCard({ qr }: QRCardProps) {
             borderRadius: "var(--radius)",
             padding: "1.5rem",
             display: "flex",
+            flexWrap: "wrap", // Allow wrapping on small screens
             gap: "1.5rem",
             backgroundColor: "var(--color-bg)",
             alignItems: "flex-start"
@@ -26,16 +27,17 @@ export default function QRCard({ qr }: QRCardProps) {
                 background: "white",
                 borderRadius: "0.5rem",
                 border: "1px solid var(--color-border)",
-                display: "flex"
+                display: "flex",
+                flexShrink: 0 // Prevent QR code from squishing
             }}>
                 <QRCodeSVG value={fullRedirectUrl} size={100} level="M" />
             </div>
 
-            <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+            <div style={{ flex: 1, minWidth: "200px" /* Ensure it wraps if too narrow */ }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
                     <div>
-                        <h3 style={{ fontWeight: "600", fontSize: "1.1rem", marginBottom: "0.25rem" }}>{qr.name}</h3>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--color-secondary)" }}>
+                        <h3 style={{ fontWeight: "600", fontSize: "1.1rem", marginBottom: "0.25rem", wordBreak: "break-all" }}>{qr.name}</h3>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--color-secondary)", flexWrap: "wrap" }}>
                             <span style={{ fontFamily: "monospace", background: "var(--color-border)", padding: "0.1rem 0.4rem", borderRadius: "0.25rem" }}>
                                 /{qr.slug}
                             </span>
@@ -58,14 +60,24 @@ export default function QRCard({ qr }: QRCardProps) {
                         href={qr.destinationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ display: "flex", alignItems: "center", gap: "0.25rem", color: "var(--color-accent)", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.25rem",
+                            color: "var(--color-accent)",
+                            textDecoration: "none",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            maxWidth: "100%" // Ensure it respects container
+                        }}
                     >
-                        {qr.destinationUrl}
-                        <ExternalLink size={12} />
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{qr.destinationUrl}</span>
+                        <ExternalLink size={12} style={{ flexShrink: 0 }} />
                     </a>
                 </div>
 
-                <div style={{ display: "flex", gap: "0.75rem" }}>
+                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                     <Link to={`/qr/${qr.id}`} className="btn btn-outline" style={{ fontSize: "0.875rem", padding: "0.4rem 0.8rem", gap: "0.4rem" }}>
                         <Edit2 size={14} />
                         Manage
