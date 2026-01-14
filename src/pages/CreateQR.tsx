@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Zap, FileText, Wifi, User, Mail, MessageSquare, Calendar as CalendarIcon, MapPin, Link as LinkIcon, Download } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft, Save, Zap, FileText, Wifi, User, Mail, MessageSquare, Calendar as CalendarIcon, MapPin, Link as LinkIcon, Download, CheckCircle } from "lucide-react";
 import { generateSlug } from "../utils/slug";
 import { createQRLink } from "../services/storage.service";
 import { QRCodeSVG } from "qrcode.react";
 import * as Payloads from "../utils/qr-payloads";
-
 
 type StaticType = "url" | "wifi" | "vcard" | "text" | "email" | "sms" | "event" | "geo";
 
@@ -16,11 +15,13 @@ export default function CreateQR() {
 
     // Dynamic Form Data
     const [dynamicData, setDynamicData] = useState({ name: "", destinationUrl: "" });
+    const [createdQR, setCreatedQR] = useState<any>(null); // Store created QR for success view
 
     // Static Form Data (Generic bucket)
     const [staticData, setStaticData] = useState<any>({});
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [downloadFormat, setDownloadFormat] = useState<"svg" | "png" | "jpeg">("svg");
 
     // Helpers to generate payload based on type
     const getStaticPayload = () => {
@@ -50,23 +51,63 @@ export default function CreateQR() {
         const slug = generateSlug();
         const name = dynamicData.name.trim() || url;
 
-        createQRLink({ id, slug, name, destinationUrl: url });
-        navigate(`/qr/${id}`);
+        const newQR = { id, slug, name, destinationUrl: url };
+        createQRLink(newQR);
+
+        // Simulate a brief loading state for better UX
+        setTimeout(() => {
+            setCreatedQR(newQR);
+            setIsSubmitting(false);
+        }, 500);
     };
 
     const downloadStatic = () => {
         const svg = document.querySelector("#static-qr-preview svg");
         if (!svg) return;
-        const svgData = new XMLSerializer().serializeToString(svg);
-        const blob = new Blob([svgData], { type: "image/svg+xml" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `qryft-static-${staticType}.svg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+
+        if (downloadFormat === "svg") {
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], { type: "image/svg+xml" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `qryft-static-${staticType}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } else {
+            // Canvas Rasterization
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const img = new Image();
+
+            const size = 1000;
+            canvas.width = size;
+            canvas.height = size;
+
+            const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = () => {
+                if (!ctx) return;
+                if (downloadFormat === "jpeg") {
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(0, 0, size, size);
+                }
+                ctx.drawImage(img, 0, 0, size, size);
+                const imgUrl = canvas.toDataURL(`image/${downloadFormat}`);
+                const a = document.createElement("a");
+                a.href = imgUrl;
+                a.download = `qryft-static-${staticType}.${downloadFormat}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        }
     };
 
     const StaticTypeButton = ({ type, icon: Icon, label }: { type: StaticType, icon: any, label: string }) => (
@@ -79,7 +120,8 @@ export default function CreateQR() {
                 border: "1px solid var(--color-border)",
                 background: staticType === type ? "var(--color-primary)" : "var(--color-bg)",
                 color: staticType === type ? "var(--color-bg)" : "var(--color-text)",
-                cursor: "pointer", transition: "all 0.2s"
+                cursor: "pointer", transition: "all 0.2s",
+                whiteSpace: "nowrap"
             }}
         >
             <Icon size={24} />
@@ -102,7 +144,7 @@ export default function CreateQR() {
             {/* Mode Toggle */}
             <div style={{ display: "flex", background: "var(--color-bg)", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", padding: "0.25rem", marginBottom: "2rem" }}>
                 <button
-                    onClick={() => setMode("dynamic")}
+                    onClick={() => { setMode("dynamic"); setCreatedQR(null); }}
                     style={{
                         flex: 1, padding: "0.75rem", borderRadius: "calc(var(--radius) - 2px)", border: "none",
                         background: mode === "dynamic" ? "var(--color-primary)" : "transparent",
@@ -114,7 +156,7 @@ export default function CreateQR() {
                     Dynamic Link (Trackable)
                 </button>
                 <button
-                    onClick={() => setMode("static")}
+                    onClick={() => { setMode("static"); setCreatedQR(null); }}
                     style={{
                         flex: 1, padding: "0.75rem", borderRadius: "calc(var(--radius) - 2px)", border: "none",
                         background: mode === "static" ? "var(--color-primary)" : "transparent",
@@ -128,36 +170,59 @@ export default function CreateQR() {
             </div>
 
             {mode === "dynamic" ? (
-                <form onSubmit={handleDynamicSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                    <div>
-                        <label className="label">Destination URL</label>
-                        <input
-                            type="url" required placeholder="https://example.com" className="input"
-                            value={dynamicData.destinationUrl}
-                            onChange={e => setDynamicData({ ...dynamicData, destinationUrl: e.target.value })}
-                        />
-                        <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--color-secondary)" }}>
-                            Redirects via Qryft. Can be changed later.
-                        </p>
-                    </div>
-                    <div>
-                        <label className="label">Name (Optional)</label>
-                        <input
-                            type="text" placeholder="e.g. Summer Campaign" className="input"
-                            value={dynamicData.name}
-                            onChange={e => setDynamicData({ ...dynamicData, name: e.target.value })}
-                        />
-                    </div>
-                    <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ padding: "0.75rem", marginTop: "1rem" }}>
-                        <Save size={18} style={{ marginRight: "0.5rem" }} />
-                        {isSubmitting ? "Creating..." : "Create Dynamic QR"}
-                    </button>
-                </form>
+                <>
+                    {createdQR ? (
+                        <div style={{ textAlign: "center", padding: "3rem 1rem", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", background: "var(--color-bg)" }}>
+                            <div style={{ display: "inline-flex", padding: "1rem", background: "#f0fdf4", borderRadius: "50%", color: "#16a34a", marginBottom: "1.5rem" }}>
+                                <CheckCircle size={48} />
+                            </div>
+                            <h2 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "0.5rem" }}>QR Code Created Successfully!</h2>
+                            <p style={{ color: "var(--color-secondary)", marginBottom: "2rem" }}>
+                                Your dynamic link is ready. You can manage it from the dashboard.
+                            </p>
+
+                            <div style={{ background: "white", padding: "1rem", border: "1px solid var(--color-border)", borderRadius: "0.5rem", display: "inline-block", marginBottom: "2rem" }}>
+                                <QRCodeSVG value={`${window.location.origin}${import.meta.env.BASE_URL}q/${createdQR.slug}`} size={150} level="M" />
+                            </div>
+
+                            <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+                                <Link to="/dashboard" className="btn btn-outline">Go to Dashboard</Link>
+                                <Link to={`/qr/${createdQR.id}`} className="btn btn-primary">Manage QR</Link>
+                            </div>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleDynamicSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                            <div>
+                                <label className="label">Destination URL</label>
+                                <input
+                                    type="url" required placeholder="https://example.com" className="input"
+                                    value={dynamicData.destinationUrl}
+                                    onChange={e => setDynamicData({ ...dynamicData, destinationUrl: e.target.value })}
+                                />
+                                <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--color-secondary)" }}>
+                                    Redirects via Qryft. Can be changed later.
+                                </p>
+                            </div>
+                            <div>
+                                <label className="label">Name (Optional)</label>
+                                <input
+                                    type="text" placeholder="e.g. Summer Campaign" className="input"
+                                    value={dynamicData.name}
+                                    onChange={e => setDynamicData({ ...dynamicData, name: e.target.value })}
+                                />
+                            </div>
+                            <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ padding: "0.75rem", marginTop: "1rem" }}>
+                                <Save size={18} style={{ marginRight: "0.5rem" }} />
+                                {isSubmitting ? "Creating..." : "Create Dynamic QR"}
+                            </button>
+                        </form>
+                    )}
+                </>
             ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "2rem", alignItems: "start" }}>
+                <div className="create-qr-layout">
                     {/* Left: Configuration */}
                     <div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "0.5rem", marginBottom: "2rem" }}>
+                        <div className="type-selector-grid">
                             <StaticTypeButton type="url" icon={LinkIcon} label="URL" />
                             <StaticTypeButton type="text" icon={FileText} label="Text" />
                             <StaticTypeButton type="wifi" icon={Wifi} label="Wi-Fi" />
@@ -264,8 +329,29 @@ export default function CreateQR() {
                         <p style={{ fontSize: "0.8rem", color: "var(--color-secondary)", marginBottom: "1rem", wordBreak: "break-all" }}>
                             {getStaticPayload().slice(0, 50)}...
                         </p>
+
+                        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", marginBottom: "1rem" }}>
+                            {["svg", "png", "jpeg"].map((fmt) => (
+                                <button
+                                    key={fmt}
+                                    onClick={() => setDownloadFormat(fmt as any)}
+                                    style={{
+                                        padding: "0.25rem 0.5rem",
+                                        fontSize: "0.75rem",
+                                        borderRadius: "0.25rem",
+                                        border: "1px solid var(--color-border)",
+                                        background: downloadFormat === fmt ? "var(--color-text)" : "transparent",
+                                        color: downloadFormat === fmt ? "var(--color-bg)" : "var(--color-text)",
+                                        textTransform: "uppercase"
+                                    }}
+                                >
+                                    {fmt}
+                                </button>
+                            ))}
+                        </div>
+
                         <button onClick={downloadStatic} className="btn btn-primary" disabled={!getStaticPayload()} style={{ width: "100%", justifyContent: "center" }}>
-                            <Download size={18} style={{ marginRight: "0.5rem" }} /> Download SVG
+                            <Download size={18} style={{ marginRight: "0.5rem" }} /> Download {downloadFormat.toUpperCase()}
                         </button>
                     </div>
                 </div>
