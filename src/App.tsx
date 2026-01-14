@@ -14,7 +14,7 @@ import Layout from "./components/Layout";
 
 function App() {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/q-ryft">
             <Routes>
                 {/* Public Redirect Route - No Layout, Minimal Overhead */}
                 <Route path="/q/:slug" element={<Redirect />} />
