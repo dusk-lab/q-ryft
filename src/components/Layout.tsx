@@ -12,7 +12,7 @@ export default function Layout() {
                 <div className="container" style={{ height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <Link to="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: "bold", fontSize: "1.25rem" }}>
                         <QrCode />
-                        <span>Qryft</span>
+                        <span>Qryft (Beta)</span>
                     </Link>
                     <nav style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
                         <button
