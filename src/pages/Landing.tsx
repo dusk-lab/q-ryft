@@ -19,6 +19,9 @@ export default function Landing() {
                     <Link to="/dashboard" className="btn btn-outline" style={{ padding: "0.75rem 1.5rem", fontSize: "1.1rem" }}>
                         My QRs
                     </Link>
+                    <Link to="/scan" className="btn btn-outline" style={{ padding: "0.75rem 1.5rem", fontSize: "1.1rem" }}>
+                        Scan QR
+                    </Link>
                 </div>
             </div>
 

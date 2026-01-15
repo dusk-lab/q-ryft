@@ -31,6 +31,7 @@ export default function Layout() {
                         >
                             {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
+                        <Link to="/scan" style={{ fontSize: "0.9rem" }}>Scan</Link>
                         <Link to="/dashboard" style={{ fontSize: "0.9rem" }}>Dashboard</Link>
                         <Link to="/create" className="btn btn-primary nav-create-btn">
                             <Plus size={18} />

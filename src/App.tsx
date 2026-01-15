@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import CreateQR from "./pages/CreateQR";
+import ScanQR from "./pages/ScanQR";
 import QRDetails from "./pages/QRDetails";
 import Redirect from "./pages/Redirect";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ function App() {
                     <Route path="/" element={<Landing />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/create" element={<CreateQR />} />
+                    <Route path="/scan" element={<ScanQR />} />
                     <Route path="/qr/:id" element={<QRDetails />} />
                     <Route path="*" element={<NotFound />} />
                 </Route>

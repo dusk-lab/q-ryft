@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Trash2, CheckSquare, X } from "lucide-react";
+import { Plus, Trash2, CheckSquare, X, Camera } from "lucide-react";
 import QRCard from "../components/QRCard";
 import { listQRLinks, deleteQRLink } from "../services/storage.service";
 import { QRLink } from "../models/qr.model";
@@ -80,10 +80,16 @@ export default function Dashboard() {
                     )}
 
                     {!isSelectionMode && (
-                        <Link to="/create" className="btn btn-primary" style={{ gap: "0.5rem" }}>
-                            <Plus size={18} />
-                            New QR
-                        </Link>
+                        <>
+                            <Link to="/scan" className="btn btn-outline" style={{ gap: "0.5rem" }}>
+                                <Camera size={18} />
+                                Scan
+                            </Link>
+                            <Link to="/create" className="btn btn-primary" style={{ gap: "0.5rem" }}>
+                                <Plus size={18} />
+                                New QR
+                            </Link>
+                        </>
                     )}
                 </div>
             </div>
