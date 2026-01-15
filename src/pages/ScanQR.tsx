@@ -9,35 +9,29 @@ export default function ScanQR() {
     const [isScanning, setIsScanning] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"camera" | "file">("camera");
+    const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+    const [cameraReady, setCameraReady] = useState(false);
 
     // Refs
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        // Initialize scanner instance once
+        if (cameraReady && !isScanning) {
+            initializeScanner();
+        }
+    }, [cameraReady]);
+
+    const initializeScanner = async () => {
+        // Wait a tick for the div to mount
+        await new Promise(r => setTimeout(r, 100));
+
         const scanner = new Html5Qrcode("reader");
         scannerRef.current = scanner;
 
-        return () => {
-            // Cleanup on unmount
-            if (scanner.isScanning) {
-                scanner.stop().catch(console.error).finally(() => {
-                    scanner.clear();
-                });
-            } else {
-                scanner.clear();
-            }
-        };
-    }, []);
-
-    const startCamera = async () => {
         try {
-            setError(null);
-            if (!scannerRef.current) return;
-
-            await scannerRef.current.start(
-                { facingMode: "environment" },
+            await scanner.start(
+                { facingMode: facingMode }, // Use state
                 {
                     fps: 10,
                     qrbox: { width: 250, height: 250 },
@@ -50,25 +44,45 @@ export default function ScanQR() {
             setIsScanning(true);
         } catch (err: any) {
             console.error("Camera start error:", err);
+            setCameraReady(false);
             setError(err?.message || "Failed to start camera. Please ensure permissions are granted.");
             setIsScanning(false);
         }
+    };
+
+    const startCamera = () => {
+        setError(null);
+        setCameraReady(true);
     };
 
     const stopCamera = async () => {
         if (!scannerRef.current) return;
 
         try {
-            if (isScanning) {
-                await scannerRef.current.stop();
-            }
+            // Check if scanner is running safely
+            // Using internal state or try-catch
+            await scannerRef.current.stop();
         } catch (err) {
-            // Ignore errors if it was already stopped or in transition
             console.warn("Stop camera warning:", err);
         } finally {
             setIsScanning(false);
+            setCameraReady(false); // Reset ready state
         }
     };
+
+    const toggleCamera = async () => {
+        if (isScanning) {
+            await stopCamera();
+            setTimeout(() => {
+                setFacingMode(prev => prev === "environment" ? "user" : "environment");
+                setCameraReady(true);
+            }, 300);
+        } else {
+            setFacingMode(prev => prev === "environment" ? "user" : "environment");
+        }
+    };
+
+
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
@@ -166,11 +180,13 @@ export default function ScanQR() {
                     id="reader"
                     style={{
                         width: "100%",
-                        maxWidth: "400px",
+                        margin: "0 auto",
                         borderRadius: "0.5rem",
                         overflow: "hidden",
-                        display: (!scanResult && activeTab === "camera" && isScanning) ? "block" : "none",
-                        margin: "0 auto"
+                        // Ensure it takes up space so only when we are scanning or about to scan
+                        minHeight: (activeTab === "camera" && (isScanning || cameraReady) && !scanResult) ? "300px" : "0",
+                        display: (activeTab === "camera" && (isScanning || cameraReady) && !scanResult) ? "block" : "none",
+                        background: "#000" // Black background to see if container is there
                     }}
                 ></div>
 
@@ -222,7 +238,12 @@ export default function ScanQR() {
                         )}
 
                         {activeTab === "camera" && isScanning && (
-                            <button onClick={stopCamera} className="btn btn-outline" style={{ marginTop: "1rem", zIndex: 5 }}>Stop Camera</button>
+                            <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", zIndex: 5, justifyContent: "center", flexWrap: "wrap" }}>
+                                <button onClick={stopCamera} className="btn btn-outline" style={{ background: "rgba(255,255,255,0.8)" }}>Stop Camera</button>
+                                <button onClick={toggleCamera} className="btn btn-outline" style={{ background: "rgba(255,255,255,0.8)" }}>
+                                    Flip Camera ({facingMode === "environment" ? "Back" : "Front"})
+                                </button>
+                            </div>
                         )}
 
 
