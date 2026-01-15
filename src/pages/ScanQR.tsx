@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Html5Qrcode } from "html5-qrcode";
-import { Camera, Image as ImageIcon, Copy, ExternalLink, ArrowLeft } from "lucide-react";
+import { Camera, Image as ImageIcon, Copy, ExternalLink, ArrowLeft, RefreshCw, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function ScanQR() {
@@ -11,12 +11,20 @@ export default function ScanQR() {
     const [activeTab, setActiveTab] = useState<"camera" | "file">("camera");
     const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
     const [cameraReady, setCameraReady] = useState(false);
+    const [cameraCount, setCameraCount] = useState(0);
 
     // Refs
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        // Check for cameras on mount
+        Html5Qrcode.getCameras().then(devices => {
+            setCameraCount(devices.length);
+        }).catch(err => {
+            console.warn("Error getting cameras", err);
+        });
+
         if (cameraReady && !isScanning) {
             initializeScanner();
         }
@@ -239,10 +247,14 @@ export default function ScanQR() {
 
                         {activeTab === "camera" && isScanning && (
                             <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", zIndex: 5, justifyContent: "center", flexWrap: "wrap" }}>
-                                <button onClick={stopCamera} className="btn btn-outline" style={{ background: "rgba(255,255,255,0.8)" }}>Stop Camera</button>
-                                <button onClick={toggleCamera} className="btn btn-outline" style={{ background: "rgba(255,255,255,0.8)" }}>
-                                    Flip Camera ({facingMode === "environment" ? "Back" : "Front"})
+                                <button onClick={stopCamera} className="btn btn-outline" style={{ background: "rgba(255,255,255,0.8)", gap: "0.5rem" }}>
+                                    <XCircle size={18} /> Stop Camera
                                 </button>
+                                {cameraCount > 1 && (
+                                    <button onClick={toggleCamera} className="btn btn-outline" style={{ background: "rgba(255,255,255,0.8)", gap: "0.5rem" }}>
+                                        <RefreshCw size={18} /> Flip Camera
+                                    </button>
+                                )}
                             </div>
                         )}
 
