@@ -120,10 +120,4 @@ The architecture is intentionally simple and extensible.
 
 ---
 
-## License
-
-To be decided.
-
----
-
 Qryft is built by **Dusk Lab** with a focus on correctness, clarity, and long-term reliability.
